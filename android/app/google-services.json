@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1040324003218",
+    "project_id": "chatapp-6bdb2",
+    "storage_bucket": "chatapp-6bdb2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1040324003218:android:3fdde154d2077adc17ad4b",
+        "android_client_info": {
+          "package_name": "com.innocent.chatapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCFx_j1Udq8Qwv8U3Be_UCiBt_As6JCxxM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
