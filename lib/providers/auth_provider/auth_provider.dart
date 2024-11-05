@@ -193,7 +193,7 @@ class AuthentificationProvider extends ChangeNotifier {
     );
   }
 
-  //save user data to firestore 
+  //save user data to firestore
 
   Future<void> saveUserDataToFireStore({
     required UserModel? userModel,
@@ -262,6 +262,57 @@ class AuthentificationProvider extends ChangeNotifier {
 
   Stream<DocumentSnapshot> userStream({required String userID}) {
     return _firestore.collection(Constants.users).doc(userID).snapshots();
+  }
+
+  // get all users stream
+  Stream<QuerySnapshot> getAllUserStreams(String userID) {
+    return _firestore
+        .collection(Constants.users)
+        .where(Constants.uid, isNotEqualTo: userID)
+        .snapshots();
+  }
+
+  // send friend request
+  Future<void> sendFriendRequest({required String friendID}) async {
+    try {
+      // add our uid to friend request
+      await _firestore.collection(Constants.users).doc(friendID).update({
+        Constants.friendRequestsUIDs: FieldValue.arrayUnion([_uid]),
+      });
+
+      // add friend uid to our friend request sent list
+      await _firestore.collection(Constants.users).doc(_uid).update({
+        Constants.sendFriendsRequestUIDs: FieldValue.arrayUnion([friendID]),
+      });
+    } catch (e) {
+      debugPrint("exception : $e");
+    }
+  }
+
+  // cancel friend request
+  Future<void> cancelFriendRequest({required String friendID}) async {
+    try {
+      // remove our uid from friend request
+      await _firestore.collection(Constants.users).doc(friendID).update({
+        Constants.friendRequestsUIDs: FieldValue.arrayRemove([_uid]),
+      });
+
+      // remove friend uid from our friend request sent list
+      await _firestore.collection(Constants.users).doc(_uid).update({
+        Constants.sendFriendsRequestUIDs: FieldValue.arrayRemove([friendID]),
+      });
+    } catch (e) {
+      debugPrint("exception : $e");
+    }
+  }
+
+  // logout
+
+  Future<void> logout() async {
+    await _auth.signOut();
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    await sharedPreferences.clear();
+    notifyListeners();
   }
 
   /*

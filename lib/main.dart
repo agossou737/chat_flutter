@@ -6,6 +6,7 @@ import 'package:chat_app/auth/user_informations_screen.dart';
 import 'package:chat_app/firebase_options.dart';
 import 'package:chat_app/main_screen/main_screen.dart';
 import 'package:chat_app/main_screen/profile_screen.dart';
+import 'package:chat_app/main_screen/settings_screen.dart';
 import 'package:chat_app/providers/auth_provider/auth_provider.dart';
 import 'package:chat_app/utilities/constants.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -67,6 +68,7 @@ class MyApp extends StatelessWidget {
               Constants.userInformationsScreen: (context) =>
                   const UserInformationsScreen(),
               Constants.homeScreen: (context) => const HomeScreen(),
+              Constants.settingScreen: (context) => const SettingScreen(),
             },
           );
         });

@@ -214,7 +214,6 @@ class _OtpScreenState extends State<OtpScreen> {
 
         if (userExists) {
           //2- if yes,
-
           // * get user informations from firestore
           await authProvider.getUserDataFromFireStore();
           // * save user informations to provider in shared preferences

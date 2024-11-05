@@ -1,3 +1,4 @@
+import 'package:chat_app/main_screen/settings_screen.dart';
 import 'package:chat_app/models/user_model.dart';
 import 'package:chat_app/providers/auth_provider/auth_provider.dart';
 import 'package:chat_app/utilities/constants.dart';
@@ -25,23 +26,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final currentUser = context.read<AuthentificationProvider>().userModel;
     return Scaffold(
       appBar: AppBar(
-          leading: AppBarBackBtn.appBarBackBtn(
-            () {
-              Navigator.of(context).pop();
-            },
-          ),
-          title: const Text('Profile'),
-          centerTitle: true,
-          actions: [
-            authentificationProvider.uid == uid
-                ? IconButton(
-                    onPressed: () {
-                      // authentificationProvider.logout();
-                    },
-                    icon: const Icon(Icons.logout),
-                  )
-                : const SizedBox()
-          ]),
+        leading: AppBarBackBtn.appBarBackBtn(
+          () {
+            Navigator.of(context).pop();
+          },
+        ),
+        title: const Text('Profile'),
+        centerTitle: true,
+        actions: [
+          authentificationProvider.uid == uid
+              ? IconButton(
+                  onPressed: () {
+                    // navigate to settings page
+                    Navigator.pushNamed(
+                      context,
+                      Constants.settingScreen,
+                      arguments: uid,
+                    );
+                  },
+                  icon: const Icon(Icons.settings),
+                )
+              : const SizedBox()
+        ],
+      ),
       body: StreamBuilder(
         stream: authentificationProvider.userStream(
           userID: uid,
@@ -88,7 +95,72 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                      )
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Text(
+                        userModel.phoneNumber!,
+                        style: GoogleFonts.openSans(
+                          textStyle: const TextStyle(
+                            fontSize: 18,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(
+                            height: 40,
+                            width: 40,
+                            child: Divider(
+                              color: Colors.grey,
+                              thickness: 1,
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            'Mon Profil',
+                            style: GoogleFonts.openSans(
+                              textStyle: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          const SizedBox(
+                            height: 40,
+                            width: 40,
+                            child: Divider(
+                              color: Colors.grey,
+                              thickness: 1,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        userModel.aboutMe!,
+                        style: GoogleFonts.openSans(
+                          textStyle: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
                     ],
                   ),
                 ),
@@ -96,7 +168,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   height: 10,
                 ),
                 buildFriendsRequestBtn(
-                    currentUser: currentUser!, userModel: userModel)
+                  currentUser: currentUser!,
+                  userModel: userModel,
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                buildFriendsButton(
+                  currentUser: currentUser,
+                  userModel: userModel,
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                // buidlSendFriendRequestButton(
+                //   currentUser: currentUser,
+                //   userModel: userModel,
+                // )
               ],
             ),
           );
@@ -105,34 +193,111 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Widget buildButton({
+    required String buttonText,
+    required VoidCallback onPressed,
+    bool shouldShowButton = true,
+  }) {
+    if (!shouldShowButton) {
+      return const SizedBox();
+    }
+
+    return SizedBox(
+      width: MediaQuery.of(context).size.width * 0.8,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        child: Text(
+          buttonText.toUpperCase(),
+          style: GoogleFonts.openSans(
+            textStyle: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget buildFriendsRequestBtn({
     required UserModel currentUser,
     required UserModel userModel,
   }) {
-    if (currentUser.uid == userModel.uid) {
-      if (userModel.friendRequestUIDs!
-          .isNotEmpty /* currentUser.friendRequestUIDs!.contains(userModel.uid) */) {
-        return ElevatedButton(
-          onPressed: () {
-            // Navigate to friends request screen
-            
+    bool showButton = currentUser.uid == userModel.uid &&
+        userModel.friendRequestUIDs!.isNotEmpty;
+
+    return buildButton(
+      buttonText: "Voir l'invitation",
+      onPressed: () {
+        // Navigate to friends request screen
+      },
+      shouldShowButton: showButton,
+    );
+  }
+
+  Widget buildFriendsButton({
+    required UserModel currentUser,
+    required UserModel userModel,
+  }) {
+    // Vérification si l'utilisateur est le même et s'il y a des demandes d'amis
+    if (currentUser.uid == userModel.uid &&
+        userModel.friendRequestUIDs!.isNotEmpty) {
+      // Si les conditions sont remplies, afficher le bouton "Voir les amis"
+      return buildButton(
+        buttonText: "Voir les amis",
+        onPressed: () {
+          // Action à effectuer pour voir les amis
+        },
+        shouldShowButton: true, // Le bouton est montré
+      );
+    } else if (currentUser.uid != userModel.uid) {
+      // show cancel friend request if the user sent us a friend request
+      String label = "";
+      if (userModel.friendRequestUIDs!.contains(currentUser.uid)) {
+        label = "Annuler la demande";
+        return buildButton(
+          buttonText: label,
+          onPressed: () async {
+            // annuler une demande d'ami à l'utilisateur
+            await context
+                .read<AuthentificationProvider>()
+                .cancelFriendRequest(
+                  friendID: userModel.uid!,
+                )
+                .whenComplete(() {
+              showCustomSnackBar(
+                context,
+                "Demande d'ami annulée",
+              );
+            });
           },
-          child: Text(
-            "Voir l'invitation".toUpperCase(),
-            style: GoogleFonts.openSans(
-              textStyle: const TextStyle(
-                fontSize: 12,
-                //   color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
+          shouldShowButton: true, // Le bouton est montré
         );
       } else {
-        return const SizedBox();
+        label = "Envoyer demande d'ami";
+        // Si l'utilisateur actuel n'est pas celui de `userModel`, afficher le bouton "Envoyer une demande"
+        return buildButton(
+          buttonText: label,
+          onPressed: () async {
+            // Envoyer une demande d'ami à l'utilisateur
+            await context
+                .read<AuthentificationProvider>()
+                .sendFriendRequest(
+                  friendID: userModel.uid!,
+                )
+                .whenComplete(() {
+              showCustomSnackBar(
+                context,
+                "Demande d'ami envoyée",
+              );
+            });
+          },
+          shouldShowButton: true, // Le bouton est montré
+        );
       }
     } else {
-      return const SizedBox();
+      // Si aucune des conditions n'est remplie, retourner un SizedBox vide
+      return const SizedBox.shrink();
     }
   }
 }
